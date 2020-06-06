@@ -16,12 +16,12 @@ fun main() {
     val scanner = Scanner(System.`in`)
 
     print("osu file(not osz) route: ")
-//    val route = File(scanner.nextLine())
-    val route = File("testmaps/SYU (from GALNERYUS) - REASON (BarkingMadDog) [A THOUSAND SWORDS].osu")
+    val route = File(scanner.nextLine())
+//    val route = File("testmaps/SYU (from GALNERYUS) - REASON (BarkingMadDog) [A THOUSAND SWORDS].osu")
 
     print("mods(ex.DTHR, none): ")
-//    val modsText = scanner.nextLine().toUpperCase()
-    val modsText = "none"
+    val modsText = scanner.nextLine().toUpperCase()
+//    val modsText = "none"
 
     var mods = 0
     if(modsText.contains("DT")) mods = mods or Mods.DT.value
