@@ -6,7 +6,7 @@ enum class DotType {
     NONE, CURVE, STRAIGHT
 }
 
-class SliderDot(
+data class SliderDot(
     val point: Point,
     val dotType: DotType
 )

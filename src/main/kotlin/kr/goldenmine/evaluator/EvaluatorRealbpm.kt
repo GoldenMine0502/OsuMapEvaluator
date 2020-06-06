@@ -5,7 +5,6 @@ import kr.goldenmine.files.Beatmap
 import kr.goldenmine.files.HitObject
 import kr.goldenmine.util.Mods
 import kr.goldenmine.util.calculateBPM
-import java.text.DecimalFormat
 import kotlin.math.abs
 
 class EvaluatorRealbpm: BeatmapEvaluator {
@@ -13,7 +12,7 @@ class EvaluatorRealbpm: BeatmapEvaluator {
         get() = "real BPM"
 
     override fun evaluate(beatmap: Beatmap, mods: Int): Any? {
-        val ODMillis = calculateODtoMillis(beatmap.OD, mods)
+        val odMillis = calculateODtoMillis(beatmap.OD, mods)
         val buffer = ArrayList<HitObject>()
         val realbpms = ArrayList<Pair<Double, Int>>()
         var term = -1.0
@@ -38,7 +37,7 @@ class EvaluatorRealbpm: BeatmapEvaluator {
             } else {
                 buffer.add(current)
                 if(buffer.size >= 2) {
-                    val length = (buffer.last().startOffset - buffer.first().startOffset) * dtMultiplier() + ODMillis * 2
+                    val length = (buffer.last().startOffset - buffer.first().startOffset) * dtMultiplier() + odMillis * 2
                     val perLength = length / (buffer.size - 1)
                     val realbpm = calculateBPM(perLength) / 4
 
@@ -66,7 +65,7 @@ class EvaluatorRealbpm: BeatmapEvaluator {
 //        }
 //
 //        return "${String.format("%.1f", sum / count)} BPM"
-        return "${realbpms.maxBy { it.first }?.first} BPM"
+        return "${String.format("%.2f", realbpms.maxBy { it.first }?.first)} BPM"
     }
 
 }

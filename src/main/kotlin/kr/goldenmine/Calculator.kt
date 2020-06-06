@@ -1,8 +1,6 @@
 package kr.goldenmine
 
-import kr.goldenmine.evaluator.BeatmapEvaluator
-import kr.goldenmine.evaluator.EvaluatorBpm
-import kr.goldenmine.evaluator.EvaluatorRealbpm
+import kr.goldenmine.evaluator.*
 import kr.goldenmine.files.loadBeatmap
 import kr.goldenmine.util.Mods
 import java.io.File
@@ -12,16 +10,18 @@ fun main() {
     val evaluators = ArrayList<BeatmapEvaluator>()
     evaluators.add(EvaluatorBpm())
     evaluators.add(EvaluatorRealbpm())
+    evaluators.add(EvaluatorObtusePercent())
+    evaluators.add(EvaluatorObtusePercentWithDistance())
 
     val scanner = Scanner(System.`in`)
 
     print("osu file(not osz) route: ")
-    val route = File(scanner.nextLine())
-//    val route = File("testmaps/Kano - Ivy (GoldenMine) [Taeyang's Insane].osu")
+//    val route = File(scanner.nextLine())
+    val route = File("testmaps/SYU (from GALNERYUS) - REASON (BarkingMadDog) [A THOUSAND SWORDS].osu")
 
-    print("mods(ex.DTHR): ")
-    val modsText = scanner.nextLine()
-//    val modsText = "none"
+    print("mods(ex.DTHR, none): ")
+//    val modsText = scanner.nextLine().toUpperCase()
+    val modsText = "none"
 
     var mods = 0
     if(modsText.contains("DT")) mods = mods or Mods.DT.value

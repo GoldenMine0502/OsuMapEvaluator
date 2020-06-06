@@ -3,7 +3,7 @@ package kr.goldenmine.util
 import kotlin.math.atan2
 
 fun angle(p1: Point, p2: Point, p3: Point): Double =
-    angle(p1.xDouble, p1.yDouble, p3.xDouble, p3.yDouble, p2.xDouble, p2.yDouble)
+    angle(p1.x, p1.y, p3.x, p3.y, p2.x, p2.y)
 
 fun angle(point1X: Double, point1Y: Double,
           point2X: Double, point2Y: Double,

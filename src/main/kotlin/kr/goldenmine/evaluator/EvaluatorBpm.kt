@@ -13,9 +13,9 @@ class EvaluatorBpm : BeatmapEvaluator {
 
         return if(minBpm != null && maxBpm != null) {
             if(abs(minBpm.bpm - maxBpm.bpm) <= 0.1) {
-                "${minBpm.bpm} BPM"
+                "${String.format("%.2f", minBpm.bpm)} BPM"
             } else {
-                "${minBpm.bpm}-${maxBpm.bpm} BPM"
+                "${String.format("%.2f", minBpm.bpm)}-${String.format("%.2f", maxBpm.bpm)} BPM"
             }
         } else {
             "Error"

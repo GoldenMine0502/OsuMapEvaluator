@@ -112,32 +112,38 @@ fun loadBeatmap(route: File): Beatmap {
                         val objectData = split[5]
                         val hitObject: HitObject
 
-                        if (objectData.contains(":")) { // circle
-                            hitObject = Circle(point, offset)
-                        } else if (objectData.contains("|")) { // slider
-                            val dataSplited = objectData.split("|").toMutableList()
-                            val type = dataSplited.removeAt(0)
-                            val points = dataSplited.map {
-                                val (x, y) = it.split(":")
-                                Point(x.toInt(), y.toInt())
-                            }
-                            val dots = ArrayList<SliderDot>()
-                            dots.add(SliderDot(point, DotType.NONE))
-
-                            var index = 0
-                            while (index < points.size) {
-                                if (index < points.size - 1 && points[index] == points[index + 1]) {
-                                    dots.add(SliderDot(points[index], DotType.STRAIGHT))
-                                    index++
-                                } else {
-                                    dots.add(SliderDot(points[index], DotType.CURVE))
+                        when {
+                            objectData.contains("|") -> { // slider
+                                //x,y,time,type,hitSound,curveType|curvePoints,slides,length,edgeSounds,edgeSets,hitSample
+                                val dataSplited = objectData.split("|").toMutableList()
+                                val type = dataSplited.removeAt(0)
+                                val points = dataSplited.map {
+                                    val (x, y) = it.split(":")
+                                    Point(x.toInt(), y.toInt())
                                 }
-                            }
+                                val dots = ArrayList<SliderDot>()
+                                dots.add(SliderDot(point, DotType.NONE))
 
-                            hitObject = Slider(dots, offset, -1, Slider.Type.values().first { it.chracter == type })
-                        } else { // spinner
-                            val endOffset = objectData.toInt()
-                            hitObject = Spinner(offset, endOffset)
+                                var index = 0
+                                while (index < points.size) {
+                                    if (index < points.size - 1 && points[index] == points[index + 1]) {
+                                        dots.add(SliderDot(points[index], DotType.STRAIGHT))
+                                        index++
+                                    } else {
+                                        dots.add(SliderDot(points[index], DotType.CURVE))
+                                    }
+                                    index++
+                                }
+
+                                hitObject = Slider(dots, offset, -1, Slider.Type.values().first { it.chracter == type })
+                            }
+                            objectData.contains(":") -> { // circle
+                                hitObject = Circle(point, offset)
+                            }
+                            else -> { // spinner
+                                val endOffset = objectData.toInt()
+                                hitObject = Spinner(offset, endOffset)
+                            }
                         }
 
                         hitObjects.add(hitObject)

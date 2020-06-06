@@ -4,7 +4,7 @@ import kr.goldenmine.util.Point
 
 val spinnerPos = Point(256, 192)
 
-class Spinner(
+data class Spinner(
     override val startOffset: Int,
     override val finishOffset: Int
 ): HitObject {
