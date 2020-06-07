@@ -250,6 +250,7 @@ data class Slider(
             ceil(thetaRange / (2 * acos(1 - circularArcTolerance / r))).coerceAtLeast(2.0).toInt()
 
         val output = ArrayList<Point>(amountPoints)
+        output.add(a)
 
         for (i in 0 until amountPoints) {
             val fract: Double = i.toDouble() / (amountPoints - 1)
@@ -257,6 +258,8 @@ data class Slider(
             val o = Point(cos(theta), sin(theta)) * r
             output.add(circumcentre + o)
         }
+
+        output.add(c)
 
         return output
     }

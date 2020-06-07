@@ -18,6 +18,7 @@ class EvaluatorObtusePercentWithDistance : BeatmapEvaluator {
         var score = 0.0
 
         for(i in 1 until hitObjects.size - 1) {
+            //println(hitObjects[i].startOffset)
             val pastHitObject = hitObjects[i - 1]
             val currentHitObject = hitObjects[i]
             val nextHitObject = hitObjects[i+1]
