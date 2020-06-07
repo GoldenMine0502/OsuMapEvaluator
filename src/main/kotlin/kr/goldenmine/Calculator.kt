@@ -35,7 +35,11 @@ fun main() {
         for(evaluator in evaluators) {
             println("${evaluator.type}: ${evaluator.evaluate(beatmap, mods)}")
         }
+
+        val beatmapPreviewer = BeatmapPreviewer(beatmap)
+        beatmapPreviewer.startRender()
     } else {
         println("the file does not exist")
     }
+
 }

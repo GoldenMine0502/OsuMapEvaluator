@@ -22,7 +22,7 @@ class EvaluatorObtusePercent : BeatmapEvaluator {
             val currentHitObject = hitObjects[i]
             val nextHitObject = hitObjects[i + 1]
 
-            if((pastHitObject is Circle) && (currentHitObject is Circle) && (nextHitObject is Circle) && (nextHitObject.point - currentHitObject.point).length > 1) {
+            if((pastHitObject is Circle) && (currentHitObject is Circle) /*&& (nextHitObject is Circle)*/ && (nextHitObject.startPosition - currentHitObject.startPosition).length > 1) {
                 val angle = angle(pastHitObject.startPosition, currentHitObject.startPosition, nextHitObject.startPosition)
                 val angleScore = if(angle >= 90) {
                     (hardestAngle-abs(hardestAngle - angle) * 2.5) / hardestAngle

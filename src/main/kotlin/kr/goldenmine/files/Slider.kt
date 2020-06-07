@@ -1,6 +1,5 @@
 package kr.goldenmine.files
 
-import edu.uiuc.cs.charm.BezierLine
 import kr.goldenmine.util.Point
 import java.util.*
 import kotlin.collections.ArrayList
@@ -12,78 +11,206 @@ val bezierTolerance = 0.25f
 data class Slider(
     val points: List<SliderDot>,
     override val startOffset: Int,
-    override val finishOffset: Int,
+    val timingPoint: TimingPoint,
+    val lengthPixel: Double,
     val type: Type
-): HitObject {
+) : HitObject {
 
     enum class Type(val chracter: String) {
         STRAIGHT("L"), CURVE("P"), BEZIER("B")
     }
+
     override val startPosition: Point
-        get() = points.first().point
+        get() = path.first()
     override val endPosition: Point
-        get() = points.last().point
+        get() = path.last()
+
+    override val finishOffset: Int
+        get() = startOffset + (timingPoint.bpm * sliderLength()).toInt()
+
+    val path: List<Point>
 
     init {
+        fun adaptResult(result: List<Point>): List<Point> {
+            var partLength = 0.0
+            var minIndex = result.size
+            val lengthSlider = lengthPixel
 
-    }
+            for (i in 0 until result.size - 1) {
+                partLength += (result[i + 1] - result[i]).length
+                if (partLength >= lengthSlider) {
+                    minIndex = i + 1
+                    break
+                }
+            }
 
-    lateinit var path: List<Point>
+            return result.subList(0, minIndex)
+        }
 
-    // not osu! lazer, currently osu calculation system
-    fun calculatePath() {
-        when(type) {
+        when (type) {
             Type.STRAIGHT -> {
-                path = points.map { it.point }.toList()
+                val startPos = points[0]
+                val finishPos = points[1]
+
+                val direction = (finishPos.point - startPos.point)
+                val angle = atan2(direction.y, direction.x)
+                val actualFinishPos =
+                    Point(startPos.point.x + lengthPixel * cos(angle), startPos.point.y + lengthPixel * sin(angle))
+
+                path = listOf(startPos.point, actualFinishPos)
             }
 
             Type.CURVE -> {
-                path = curveSlider()
+                val result = curveSlider()
+
+                path = result
             }
 
             Type.BEZIER -> {
                 //val bezier = BezierLine()
-                val points = points.map { edu.uiuc.cs.charm.Point(it.point.xInt, it.point.yInt) }.toTypedArray()
 
-                //bezier.try_bezier_generation(points, points.size, )
+                val buffer = ArrayList<Point>()
+                val result = ArrayList<Point>()
+
+                for (i in points.indices) {
+                    val point = points[i]
+                    buffer.add(point.point)
+                    if (i == points.size - 1 || point.dotType == DotType.STRAIGHT) {
+                        result.addAll(bezierSlider(ArrayList(buffer)))
+                        result.removeAt(result.size - 1)
+
+                        buffer.clear()
+                        buffer.add(point.point)
+                    }
+                }
+
+                result.add(points.last().point)
+
+                path = result
             }
+            //else -> throw RuntimeException("slider type is strange: $type")
         }
     }
 
-    fun bezierSlider(subPoints: List<Point>): List<Point> {
-        val output = ArrayList<Point>()
-        val count = subPoints.size
+    fun sliderLength(): Double {
+        val adaptedSliderVelocity = timingPoint.bpm * timingPoint.sliderVelocity
 
-        if(count > 0) {
+        return lengthPixel / adaptedSliderVelocity
+    }
+
+    fun bezierSlider(controlPoints: List<Point>): List<Point> {
+        val output = ArrayList<Point?>()
+        val count = controlPoints.size
+
+        if (count > 0) {
             val subdivisionBuffer1 = arrayOfNulls<Point>(count)
             val subdivisionBuffer2 = arrayOfNulls<Point>(count * 2 + 1)
 
-            val toFlatten = Stack<Array<Point>>()
-            val freeBuffers = Stack<Array<Point>>()
+            val toFlatten = Stack<Array<Point?>>()
+            val freeBuffers = Stack<Array<Point?>>()
 
-            toFlatten.push(subPoints.toTypedArray())
+            toFlatten.push(controlPoints.toTypedArray())
 
-            val leftChild = subdivisionBuffer2;
+            val leftChild = subdivisionBuffer2
 
-            while(toFlatten.size > 0) {
-                val parent = toFlatten.peek()
+            while (toFlatten.size > 0) {
+                val parent = toFlatten.pop()
 
-                if(isBezierFlatEnough(parent)) {
+                if (isBezierFlatEnough(parent)) {
+                    bezierApproximate(parent, output, subdivisionBuffer1, subdivisionBuffer2, count)
 
+                    freeBuffers.push(parent)
+                    continue
                 }
+
+                val rightChild = if (freeBuffers.size > 0) freeBuffers.pop() else arrayOfNulls(count)
+                bezierSubdivide(parent, leftChild, rightChild, subdivisionBuffer1, count)
+
+                for (i in 0 until count)
+                    parent[i] = leftChild[i]
+
+                toFlatten.push(rightChild)
+                toFlatten.push(parent)
             }
         }
 
-        return output
+        output.add(controlPoints.last())
+
+        return output.map { it!! }.toList()
     }
 
-    fun bezierApproximate(points: Array<Point>): List<Point> {
-        TODO("not implemented")
+    /*
+
+    private static void bezierApproximate(Vector2[] controlPoints, List<Vector2> output, Vector2[] subdivisionBuffer1, Vector2[] subdivisionBuffer2, int count)
+        {
+            Vector2[] l = subdivisionBuffer2;
+            Vector2[] r = subdivisionBuffer1;
+
+            bezierSubdivide(controlPoints, l, r, subdivisionBuffer1, count);
+
+            for (int i = 0; i < count - 1; ++i)
+                l[count + i] = r[i + 1];
+
+            output.Add(controlPoints[0]);
+
+            for (int i = 1; i < count - 1; ++i)
+            {
+                int index = 2 * i;
+                Vector2 p = 0.25f * (l[index - 1] + 2 * l[index] + l[index + 1]);
+                output.Add(p);
+            }
+        }
+     */
+
+    fun bezierApproximate(
+        parent: Array<Point?>,
+        output: MutableList<Point?>,
+        subdivisionBuffer: Array<Point?>,
+        subdivisionBuffer2: Array<Point?>,
+        count: Int
+    ) {
+        val l = subdivisionBuffer2
+        val r = subdivisionBuffer
+
+        bezierSubdivide(parent, l, r, subdivisionBuffer, count)
+
+        for (i in 0 until count - 1)
+            l[count + i] = r[i + 1]
+
+        output.add(parent[0])
+
+        for (i in 1 until count - 1) {
+            val index = 2 * i
+            val p = (l[index - 1]!! + l[index]!! * 2 + l[index + 1]!!) * 0.25
+
+            output.add(p)
+        }
     }
 
-    fun isBezierFlatEnough(points: Array<Point>): Boolean {
-        for(i in 1 until points.size - 1) {
-            if ((points[i - 1] - points[i] * 2 + points[i + 1]).lengthSquared < bezierTolerance * bezierTolerance * 4)
+    fun bezierSubdivide(
+        parent: Array<Point?>,
+        l: Array<Point?>,
+        r: Array<Point?>,
+        subdivisionBuffer: Array<Point?>,
+        count: Int
+    ) {
+        val midpoints = subdivisionBuffer
+
+        for (i in 0 until count)
+            midpoints[i] = parent[i]
+
+        for (i in 0 until count) {
+            l[i] = midpoints[0]
+            r[count - i - 1] = midpoints[count - i - 1]
+
+            for (j in 0 until count - i - 1)
+                midpoints[j] = (midpoints[j]!! + midpoints[j + 1]!!) / 2
+        }
+    }
+
+    fun isBezierFlatEnough(points: Array<Point?>): Boolean {
+        for (i in 1 until points.size - 1) {
+            if ((points[i - 1]!! - points[i]!! * 2 + points[i + 1]!!).lengthSquared > bezierTolerance * bezierTolerance * 4)
                 return false
         }
 
@@ -109,9 +236,10 @@ data class Slider(
         var dir = 1.0
         var thetaRange = thetaEnd - thetaStart
 
-        val orthoAtoC = Point(a.x - c.x, c.y - a.y)
+        var orthoAtoC = c - a
+        orthoAtoC = Point(orthoAtoC.y, -orthoAtoC.x)
 
-        if(orthoAtoC.dot(b - a) < 0) {
+        if (orthoAtoC.dot(b - a) < 0) {
             dir = -dir
             thetaRange = 2 * Math.PI - thetaRange
         }

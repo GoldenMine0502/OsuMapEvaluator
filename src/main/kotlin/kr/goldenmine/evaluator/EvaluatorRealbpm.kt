@@ -19,15 +19,13 @@ class EvaluatorRealbpm: BeatmapEvaluator {
 
         //println("ODMillis: $ODMillis")
 
-        fun dtMultiplier(): Double {
-            return (if(mods and Mods.DT.value > 0) 2.0/3.0 else 1.0)
-        }
+
 
         var i = 0
         while(i < beatmap.hitObjects.size - 1) {
             val current = beatmap.hitObjects[i]
             val next = beatmap.hitObjects[i+1]
-            val currentTerm = (next.startOffset - current.startOffset) * dtMultiplier()
+            val currentTerm = (next.startOffset - current.startOffset) * dtMultiplier(mods)
 
             if(term == -1.0 || buffer.isEmpty()) {
                 term = currentTerm
@@ -37,7 +35,7 @@ class EvaluatorRealbpm: BeatmapEvaluator {
             } else {
                 buffer.add(current)
                 if(buffer.size >= 2) {
-                    val length = (buffer.last().startOffset - buffer.first().startOffset) * dtMultiplier() + odMillis * 2
+                    val length = (buffer.last().startOffset - buffer.first().startOffset) * dtMultiplier(mods) + odMillis * 2
                     val perLength = length / (buffer.size - 1)
                     val realbpm = calculateBPM(perLength) / 4
 
