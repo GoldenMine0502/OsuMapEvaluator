@@ -12,6 +12,8 @@ fun main() {
     evaluators.add(EvaluatorRealbpm())
     evaluators.add(EvaluatorObtusePercent())
     evaluators.add(EvaluatorObtusePercentWithDistance())
+    evaluators.add(EvaluatorDistanceVarience())
+    evaluators.add(EvaluatorDistanceVarienceMultiply())
 
     val scanner = Scanner(System.`in`)
 

@@ -141,6 +141,8 @@ fun loadBeatmap(route: File): Beatmap {
                                         index++
                                     }
 
+                                    val sliderType = Slider.Type.values().first { it.chracter == type }
+
                                     //println("x")
                                     // TODO need to calculate finishOffset
                                     hitObject = Slider(
@@ -148,7 +150,8 @@ fun loadBeatmap(route: File): Beatmap {
                                         offset,
                                         timingPoint,
                                         length,
-                                        Slider.Type.values().first { it.chracter == type })
+                                        // for 3 dots straight slider
+                                        if(sliderType == Slider.Type.CURVE && dots.size != 3) Slider.Type.BEZIER else sliderType)
                                 }
                                 objectData.contains(":") -> { // circle
                                     hitObject = Circle(point, offset)
