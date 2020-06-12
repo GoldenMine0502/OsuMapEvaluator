@@ -3,9 +3,9 @@ package kr.goldenmine.files
 import java.io.File
 
 class Beatmap(
-//    val title: String
+    val title: String,
     val titleUnicode: String,
-//    val artist: String
+    val artist: String,
     val artistUnicode: String,
 //    val creator: String
     val version: String,

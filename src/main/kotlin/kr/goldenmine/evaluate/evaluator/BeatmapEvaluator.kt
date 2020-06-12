@@ -1,4 +1,4 @@
-package kr.goldenmine.evaluator
+package kr.goldenmine.evaluate.evaluator
 
 import kr.goldenmine.files.Beatmap
 import kr.goldenmine.util.Mods

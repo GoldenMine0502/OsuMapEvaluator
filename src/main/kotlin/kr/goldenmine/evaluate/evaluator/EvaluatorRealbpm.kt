@@ -1,9 +1,8 @@
-package kr.goldenmine.evaluator
+package kr.goldenmine.evaluate.evaluator
 
 import kr.goldenmine.util.calculateODtoMillis
 import kr.goldenmine.files.Beatmap
 import kr.goldenmine.files.HitObject
-import kr.goldenmine.util.Mods
 import kr.goldenmine.util.calculateBPM
 import kotlin.math.abs
 
@@ -50,20 +49,19 @@ class EvaluatorRealbpm: BeatmapEvaluator {
             i++
         }
 
-//        var sum = 0.0
-//        var count = 0.0
-//        var steminaMin = 0.0
-//        var decay = 1.0
-//        var decayPer = 0.05
-//
-//        realbpms.sortedByDescending { it.first }.forEach {
-//            sum += it.first * it.second * decay
-//            count += it.second * decay
-//            decay = (decay - decayPer).coerceAtLeast(steminaMin)
-//        }
-//
-//        return "${String.format("%.1f", sum / count)} BPM"
-        return "${String.format("%.2f", realbpms.maxBy { it.first }?.first)} BPM"
+        var sum = 0.0
+        var count = 0.0
+        var steminaMin = 0.0
+        var decay = 1.0
+        var decayPer = 0.05
+
+        realbpms.sortedByDescending { it.first }.forEach {
+            sum += it.first * it.second * decay
+            count += it.second * decay
+            //decay = (decay - decayPer).coerceAtLeast(steminaMin)
+        }
+
+        return "max(${String.format("%.2f", realbpms.maxBy { it.first }?.first)}), average(${String.format("%.1f", sum / count)}) BPM"
     }
 
 }

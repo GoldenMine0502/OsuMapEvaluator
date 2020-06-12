@@ -1,13 +1,13 @@
-package kr.goldenmine.evaluator
+package kr.goldenmine.evaluate.evaluator
 
 import kr.goldenmine.files.Beatmap
 import kr.goldenmine.files.Circle
 import kr.goldenmine.util.angle
 import kotlin.math.abs
 
-class EvaluatorObtusePercentWithDistance : BeatmapEvaluator {
+class EvaluatorObtusePercent : BeatmapEvaluator {
     override val type: String
-        get() = "Obtuse percent(distance)"
+        get() = "Obtuse percent"
 
     val hardestAngle = 150.0
 
@@ -18,24 +18,20 @@ class EvaluatorObtusePercentWithDistance : BeatmapEvaluator {
         var score = 0.0
 
         for(i in 1 until hitObjects.size - 1) {
-            //println(hitObjects[i].startOffset)
             val pastHitObject = hitObjects[i - 1]
             val currentHitObject = hitObjects[i]
-            val nextHitObject = hitObjects[i+1]
+            val nextHitObject = hitObjects[i + 1]
 
-            val distance = (nextHitObject.startPosition - currentHitObject.startPosition).length / (nextHitObject.startOffset - currentHitObject.finishOffset)
-
-            if(pastHitObject is Circle && currentHitObject is Circle && nextHitObject is Circle) {
+            if((pastHitObject is Circle) && (currentHitObject is Circle) /*&& (nextHitObject is Circle)*/ && (nextHitObject.startPosition - currentHitObject.startPosition).length > 1) {
                 val angle = angle(pastHitObject.startPosition, currentHitObject.startPosition, nextHitObject.startPosition)
                 val angleScore = if(angle >= 90) {
-                    (hardestAngle-abs(hardestAngle - angle)) / hardestAngle
+                    (hardestAngle-abs(hardestAngle - angle) * 2.5) / hardestAngle
                 } else 0.0
 
-                score += angleScore * distance
+                score += angleScore
             }
-            count += distance
 
-            // 150 = 1,
+            count++
         }
 
         return "${String.format("%.2f", score / count * 100)}%"

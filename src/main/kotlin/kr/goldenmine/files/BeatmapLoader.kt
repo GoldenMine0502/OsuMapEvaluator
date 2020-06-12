@@ -39,7 +39,9 @@ val splitPattern = Pattern.compile(":[ ]?")
 
 fun loadBeatmap(route: File): Beatmap {
     var titleUnicode: String? = null
+    var title: String? = null
     var artistUnicode: String? = null
+    var artist: String? = null
     var version: String? = null
     var beatmapId: Int? = null
     var beatmapSetId: Int? = null
@@ -56,7 +58,7 @@ fun loadBeatmap(route: File): Beatmap {
         var lastbpm: Double? = null
         var lastbpmMs: Double? = null
         lines.forEach line@{ line ->
-            println(line)
+            //println(line)
 
                 BeatmapType.values().forEach {
                     if (it.type == line) {
@@ -69,7 +71,9 @@ fun loadBeatmap(route: File): Beatmap {
                     val (key, value) = line.split(splitPattern)
 
                     when (BeatmapAttribute.values().firstOrNull { it.type == key }) {
+                        BeatmapAttribute.Title -> title = value
                         BeatmapAttribute.TitleUnicode -> titleUnicode = value
+                        BeatmapAttribute.Artist -> artist = value
                         BeatmapAttribute.ArtistUnicode -> artistUnicode = value
                         BeatmapAttribute.Version -> version = value
                         BeatmapAttribute.BeatmapId -> beatmapId = value.toInt()
@@ -170,7 +174,9 @@ fun loadBeatmap(route: File): Beatmap {
     }
 
     return Beatmap(
+        title = title ?: throw RuntimeException("no title"),
         titleUnicode = titleUnicode ?: throw RuntimeException("no titleUnicode"),
+        artist = artistUnicode ?: throw RuntimeException("no artistUnicode"),
         artistUnicode = artistUnicode ?: throw RuntimeException("no artistUnicode"),
         version = version ?: throw RuntimeException("no version"),
         beatmapId = beatmapId ?: throw RuntimeException("no beatmapId"),
