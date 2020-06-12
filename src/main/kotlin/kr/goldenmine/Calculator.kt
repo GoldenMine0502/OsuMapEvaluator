@@ -4,19 +4,30 @@ import kr.goldenmine.evaluate.evaluator.*
 import kr.goldenmine.files.Beatmap
 import kr.goldenmine.files.loadBeatmap
 import kr.goldenmine.util.Mods
+import kr.goldenmine.util.getResource
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import java.io.File
 import java.io.FileOutputStream
 import java.util.*
 
 fun main() {
+    val chrome = getResource("chromedriver.exe")
+
+    if (chrome != null && chrome.exists()) {
+        System.setProperty("webdriver.chrome.driver", chrome.absolutePath)
+        //System.setProperty("webdriver.gecko.driver", "resources/geckodriver.exe");
+    } else {
+        println("chromedriver가 존재하지 않습니다. 비트맵 다운로드가 불가능합니다.")
+    }
+
     val evaluators = ArrayList<BeatmapEvaluator>()
     evaluators.add(EvaluatorBpm())
     evaluators.add(EvaluatorRealbpm())
     evaluators.add(EvaluatorObtusePercent())
     evaluators.add(EvaluatorObtusePercentWithDistance())
     evaluators.add(EvaluatorDistanceVarience())
-    evaluators.add(EvaluatorDistanceVarienceMultiply())
+    //evaluators.add(EvaluatorDistanceVarienceMultiply())
+    evaluators.add(EvaluatorVelocity())
 
     val scanner = Scanner(System.`in`)
 
@@ -29,6 +40,12 @@ fun main() {
     print("mods(ex.DTHR, none): ")
     val modsText = scanner.nextLine().toUpperCase()
 //    val modsText = "none"
+//
+//    print("osu id: ")
+//    val osuId = scanner.nextLine()
+//
+//    print("osu pw: ")
+//    val osuPw = scanner.nextLine()
 
     var mods = 0
     if(modsText.contains("DT")) mods = mods or Mods.DT.value
@@ -71,7 +88,7 @@ fun main() {
         }
     }
 
-    val resultFile = File("result.xls")
+    val resultFile = File("result_${folder.path}.xls")
     if(!resultFile.exists()) resultFile.createNewFile()
 
     val outputStream = FileOutputStream(resultFile)

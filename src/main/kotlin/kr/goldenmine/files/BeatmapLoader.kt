@@ -15,6 +15,7 @@ enum class BeatmapType(val type: String, val colon: Boolean) {
     Metadata("[Metadata]", true),
     Difficulty("[Difficulty]", true),
     Events("[Events]", false),
+    BreakPeriods("//Break Periods", false),
     TimingPoints("[TimingPoints]", false),
     HitObjects("[HitObjects]", false),
 }
@@ -52,6 +53,7 @@ fun loadBeatmap(route: File): Beatmap {
     var sliderVelocity: Double? = null
     val timingPoints = ArrayList<TimingPoint>()
     val hitObjects = ArrayList<HitObject>()
+    val breakPeriods = ArrayList<BreakPeriod>()
 
     route.useLines { lines ->
         var lastType = None
@@ -112,6 +114,9 @@ fun loadBeatmap(route: File): Beatmap {
 
                             lastbpm = timingPoint.bpm
                             lastbpmMs = bpmMs
+                        }
+                        BreakPeriods -> {
+
                         }
                         HitObjects -> {
                             val split = line.split(",")

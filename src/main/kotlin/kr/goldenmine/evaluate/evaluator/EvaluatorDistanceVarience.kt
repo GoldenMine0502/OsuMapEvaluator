@@ -27,7 +27,7 @@ class EvaluatorDistanceVarience: BeatmapEvaluator {
         val average = list.average()
         val deviation = list.standardDeviation()
 
-        return "average($average), deviation($deviation), multiply(${sqrt(deviation * average)}), subtract(${abs(deviation - average)})"
+        //, multiply(${sqrt(deviation * average)}), subtract(${abs(deviation - average)})
+        return "average(${String.format("%.2f", average)}), deviation(${String.format("%.2f", deviation)})"
     }
-
 }
