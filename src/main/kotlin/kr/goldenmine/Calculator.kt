@@ -5,10 +5,15 @@ import kr.goldenmine.files.Beatmap
 import kr.goldenmine.files.loadBeatmap
 import kr.goldenmine.util.Mods
 import kr.goldenmine.util.getResource
+import org.apache.poi.hssf.usermodel.HSSFHyperlink
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
+import org.apache.poi.hssf.util.HSSFColor
+import org.apache.poi.ss.usermodel.CreationHelper
+import org.apache.poi.ss.usermodel.Hyperlink
 import java.io.File
 import java.io.FileOutputStream
 import java.util.*
+
 
 fun main() {
     val chrome = getResource("chromedriver.exe")
@@ -60,6 +65,7 @@ fun main() {
 
     val workbook = HSSFWorkbook()
     val sheet = workbook.createSheet()
+    val createHelper: CreationHelper = workbook.creationHelper
 
     // 초기 표 타이틀 설정
     sheet.createRow(0).also { row ->
@@ -67,9 +73,10 @@ fun main() {
         row.createCell(1).setCellValue("setId")
         row.createCell(2).setCellValue("name")
         row.createCell(3).setCellValue("version")
+        row.createCell(4).setCellValue("link")
 
         repeat(evaluators.size) {
-           row.createCell(it + 4).setCellValue(evaluators[it].type)
+           row.createCell(it + 5).setCellValue(evaluators[it].type)
         }
     }
 
@@ -81,9 +88,25 @@ fun main() {
             row.createCell(1).setCellValue(beatmap.beatmapSetId.toDouble())
             row.createCell(2).setCellValue(beatmap.title)
             row.createCell(3).setCellValue(beatmap.version)
+            row.createCell(4).also {
+                if(beatmap.beatmapSetId != -1) {
+                    val link = createHelper.createHyperlink(Hyperlink.LINK_URL)
+                    link.address = "https://osu.ppy.sh/beatmapsets/${beatmap.beatmapSetId}#osu/${beatmap.beatmapId}"
+
+                    val font = workbook.createFont()
+                    font.color = HSSFColor.BLUE.index
+
+                    val cellstyle = workbook.createCellStyle()
+                    cellstyle.setFont(font)
+
+                    it.hyperlink = link as HSSFHyperlink
+                    it.setCellStyle(cellstyle)
+                    it.setCellValue(link.address)
+                }
+            }
 
             repeat(evaluators.size) {
-                row.createCell(it + 4).setCellValue(evaluators[it].evaluate(beatmap, mods).toString())
+                row.createCell(it + 5).setCellValue(evaluators[it].evaluate(beatmap, mods).toString())
             }
         }
     }

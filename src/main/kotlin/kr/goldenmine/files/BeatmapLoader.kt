@@ -123,11 +123,12 @@ fun loadBeatmap(route: File): Beatmap {
                             val point = Point(split[0].toInt(), split[1].toInt())
                             val offset = split[2].toInt()
                             val timingPoint = timingPoints.first { offset >= it.offset }
-                            val objectData = split[5]
+                            val objectData = if(split.size >= 6) split[5] else null
                             val hitObject: HitObject
 
+
                             when {
-                                objectData.contains("|") -> { // slider
+                                objectData != null && objectData.contains("|") -> { // slider
                                     //x,y,time,type,hitSound,curveType|curvePoints,slides,length,edgeSounds,edgeSets,hitSample
                                     val dataSplited = objectData.split("|").toMutableList()
                                     val type = dataSplited.removeAt(0)
@@ -162,7 +163,7 @@ fun loadBeatmap(route: File): Beatmap {
                                         // for 3 dots straight slider
                                         if(sliderType == Slider.Type.CURVE && dots.size != 3) Slider.Type.BEZIER else sliderType)
                                 }
-                                objectData.contains(":") -> { // circle
+                                objectData == null || objectData.contains(":") -> { // circle
                                     hitObject = Circle(point, offset)
                                 }
                                 else -> { // spinner
