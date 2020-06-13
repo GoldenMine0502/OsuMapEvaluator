@@ -17,8 +17,8 @@ class EvaluatorDistanceVarienceMultiply: BeatmapEvaluator {
             val currentHitObject = beatmap.hitObjects[i]
             val nextHitObject = beatmap.hitObjects[i + 1]
 
-            val distancePastToCurrent = (currentHitObject.startPosition - previousHitObject.endPosition).length / (currentHitObject.startOffset - previousHitObject.finishOffset)
-            val distanceCurrentToNext = (nextHitObject.startPosition - currentHitObject.endPosition).length / (nextHitObject.startOffset - currentHitObject.finishOffset)
+            val distancePastToCurrent = (currentHitObject.startPosition - previousHitObject.endPosition).length / (currentHitObject.startOffset - previousHitObject.finishOffset) * dtMultiplier(mods)
+            val distanceCurrentToNext = (nextHitObject.startPosition - currentHitObject.endPosition).length / (nextHitObject.startOffset - currentHitObject.finishOffset) * dtMultiplier(mods)
             val gap = if(distanceCurrentToNext > 0 && distancePastToCurrent > 0) abs(distanceCurrentToNext / distancePastToCurrent) else abs(distanceCurrentToNext - distancePastToCurrent)
 
             val adaptedGap = if(gap < 1) if(gap < 0.00001) 0.0 else 1.0/gap else gap

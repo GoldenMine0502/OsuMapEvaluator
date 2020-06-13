@@ -11,7 +11,7 @@ class EvaluatorRealbpm: BeatmapEvaluator {
         get() = "real BPM"
 
     override fun evaluate(beatmap: Beatmap, mods: Int): Any? {
-        val odMillis = calculateODtoMillis(beatmap.OD, mods)
+        val odMillis = calculateODtoMillis(beatmap.OD, mods) * dtMultiplier(mods)
         val buffer = ArrayList<HitObject>()
         val realbpms = ArrayList<Pair<Double, Int>>()
         var term = -1.0

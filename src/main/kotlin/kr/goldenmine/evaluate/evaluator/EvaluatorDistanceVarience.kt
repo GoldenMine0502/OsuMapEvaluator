@@ -17,8 +17,8 @@ class EvaluatorDistanceVarience: BeatmapEvaluator {
             val currentHitObject = beatmap.hitObjects[i]
             val nextHitObject = beatmap.hitObjects[i + 1]
 
-            val distancePastToCurrent = (currentHitObject.startPosition - previousHitObject.endPosition).length / (currentHitObject.startOffset - previousHitObject.finishOffset)
-            val distanceCurrentToNext = (nextHitObject.startPosition - currentHitObject.endPosition).length / (nextHitObject.startOffset - currentHitObject.finishOffset)
+            val distancePastToCurrent = (currentHitObject.startPosition - previousHitObject.endPosition).length / (currentHitObject.startOffset - previousHitObject.finishOffset) * dtMultiplier(mods)
+            val distanceCurrentToNext = (nextHitObject.startPosition - currentHitObject.endPosition).length / (nextHitObject.startOffset - currentHitObject.finishOffset) * dtMultiplier(mods)
             val gap = abs(distanceCurrentToNext - distancePastToCurrent)
 
             list.add(gap)

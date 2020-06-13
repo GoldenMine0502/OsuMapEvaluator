@@ -23,7 +23,7 @@ class EvaluatorObtusePercentWithDistance : BeatmapEvaluator {
             val currentHitObject = hitObjects[i]
             val nextHitObject = hitObjects[i+1]
 
-            val distance = (nextHitObject.startPosition - currentHitObject.startPosition).length / (nextHitObject.startOffset - currentHitObject.finishOffset)
+            val distance = (nextHitObject.startPosition - currentHitObject.startPosition).length / (nextHitObject.startOffset - currentHitObject.finishOffset) * dtMultiplier(mods)
 
             if(pastHitObject is Circle && currentHitObject is Circle && nextHitObject is Circle) {
                 val angle = angle(pastHitObject.startPosition, currentHitObject.startPosition, nextHitObject.startPosition)
