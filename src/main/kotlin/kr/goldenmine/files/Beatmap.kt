@@ -24,3 +24,12 @@ class Beatmap(
 ) {
 
 }
+
+const val lastOffset = 10000
+
+val Beatmap.length
+    get() = hitObjects.last().finishOffset + lastOffset
+
+fun Beatmap.convertARtoMs(): Double {
+    return 1950 - 150 * this.AR
+}
