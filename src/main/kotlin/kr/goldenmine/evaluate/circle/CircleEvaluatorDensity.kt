@@ -3,12 +3,11 @@ package kr.goldenmine.evaluate.circle
 import kr.goldenmine.files.Beatmap
 import kr.goldenmine.files.HitObject
 
-class CircleEvaluatorJump2: CircleSeparatedEvaluator {
+class CircleEvaluatorDensity: CircleSeparatedEvaluator {
     override val type: String
-        get() = "jump2"
+        get() = "density"
 
     override fun evaluate(beatmap: Beatmap, lastHitObject: HitObject, currentHitObject: HitObject, mods: Int): Double {
-        return (currentHitObject.getAttribute("jump2") as Double) / (currentHitObject.startOffset - lastHitObject.startOffset)
-
+        return currentHitObject.getAttributes()["density"] as Double
     }
 }

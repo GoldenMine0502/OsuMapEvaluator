@@ -35,6 +35,10 @@ data class Slider(
         attributesPrivate[key] = value
     }
 
+    override fun getAttribute(key: String): Any? {
+        return attributesPrivate[key]
+    }
+
     val path: List<Point>
 
     init {

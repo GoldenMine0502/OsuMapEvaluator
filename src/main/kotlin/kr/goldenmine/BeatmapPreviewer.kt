@@ -4,6 +4,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kr.goldenmine.evaluate.attribute.AttributeJump2
+import kr.goldenmine.evaluate.attribute.AttributeJumpVariance
+import kr.goldenmine.evaluate.attribute.AttributeNoteDensity
 import kr.goldenmine.evaluate.attribute.IAttribute
 import kr.goldenmine.evaluate.circle.*
 import kr.goldenmine.files.*
@@ -22,11 +24,11 @@ import javax.swing.JSlider
 import kotlin.math.abs
 import kotlin.math.round
 
-class BeatmapPreviewer(private val beatmap: Beatmap) : JFrame("osu! previewer") {
+class BeatmapPreviewer(private val beatmap: Beatmap, private val mods: Int = 0) : JFrame("osu! previewer") {
     val frameWidth = 1366
     val frameHeight = 768
     val realWidth = frameHeight / 3 * 4
-    val circleSize = round(beatmap.convertCStoRadius() / 640.0 * frameWidth * 2).toInt()
+    val circleSize = round(beatmap.convertCStoRadius(mods) / 640.0 * frameWidth * 2).toInt()
     val titleGap = 17
     val sliderGap = 17
     val slider: JSlider
@@ -60,14 +62,19 @@ class BeatmapPreviewer(private val beatmap: Beatmap) : JFrame("osu! previewer") 
 
     fun initEvaluators() {
         attributors.add(AttributeJump2())
+        attributors.add(AttributeJumpVariance())
+        attributors.add(AttributeNoteDensity())
 
         evaluators.add(CircleEvaluatorJump())
         evaluators.add(CircleEvaluatorDistance())
         evaluators.add(CircleEvaluatorTerm())
         evaluators.add(CircleEvaluatorJump2())
         evaluators.add(CircleEvaluatorDistance2())
+        evaluators.add(CircleEvaluatorVariance())
+        evaluators.add(CircleEvaluatorDensity())
+        evaluators.add(CircleEvaluatorJumpTest())
 
-        attributors.forEach { it.calculateAttribute(beatmap) }
+        attributors.forEach { it.calculateAttribute(beatmap, mods) }
     }
 
     fun registerEvents() {
@@ -86,7 +93,7 @@ class BeatmapPreviewer(private val beatmap: Beatmap) : JFrame("osu! previewer") 
             override fun mouseClicked(e: MouseEvent) {
                 val point = Point(adaptPosXReversed(e.x), adaptPosYReversed(e.y) - titleGap)
                 val ms = slider.value.toLong()
-                val msAR = beatmap.convertARtoMs()
+                val msAR = beatmap.convertARtoMs(mods)
 
                 for (index in beatmap.hitObjects.indices.reversed()) {
                     val hitObject = beatmap.hitObjects[index]
@@ -137,7 +144,7 @@ class BeatmapPreviewer(private val beatmap: Beatmap) : JFrame("osu! previewer") 
     }
 
     fun searchCircles(elapsedMs: Long): List<HitObject> {
-        val msAR = beatmap.convertARtoMs()
+        val msAR = beatmap.convertARtoMs(mods)
         return beatmap.hitObjects.filter { abs(it.startOffset - elapsedMs) <= msAR }
     }
 

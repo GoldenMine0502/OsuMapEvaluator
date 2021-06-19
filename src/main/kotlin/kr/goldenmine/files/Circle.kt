@@ -18,4 +18,8 @@ class Circle(val point: Point, val offset: Int): HitObject {
     override fun addAttribute(key: String, value: Any) {
         attributesPrivate[key] = value
     }
+
+    override fun getAttribute(key: String): Any? {
+        return attributesPrivate[key]
+    }
 }

@@ -19,4 +19,8 @@ data class Spinner(
     override fun addAttribute(key: String, value: Any) {
         attributesPrivate[key] = value
     }
+
+    override fun getAttribute(key: String): Any? {
+        return attributesPrivate[key]
+    }
 }
