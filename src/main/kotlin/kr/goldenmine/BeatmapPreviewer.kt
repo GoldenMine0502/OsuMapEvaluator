@@ -3,10 +3,9 @@ package kr.goldenmine
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kr.goldenmine.evaluate.circle.CircleEvaluatorJump
-import kr.goldenmine.evaluate.circle.CircleEvaluator
-import kr.goldenmine.evaluate.circle.CircleEvaluatorDistance
-import kr.goldenmine.evaluate.circle.CircleEvaluatorTerm
+import kr.goldenmine.evaluate.attribute.AttributeJump2
+import kr.goldenmine.evaluate.attribute.IAttribute
+import kr.goldenmine.evaluate.circle.*
 import kr.goldenmine.files.*
 import kr.goldenmine.util.Point
 import java.awt.BorderLayout
@@ -21,10 +20,15 @@ import javax.swing.JFrame
 import javax.swing.JPanel
 import javax.swing.JSlider
 import kotlin.math.abs
+import kotlin.math.round
 
-class BeatmapPreviewer(private val beatmap: Beatmap): JFrame("osu! previewer") {
-    val circleSize = 45
-    val titleGap = 38
+class BeatmapPreviewer(private val beatmap: Beatmap) : JFrame("osu! previewer") {
+    val frameWidth = 1366
+    val frameHeight = 768
+    val realWidth = frameHeight / 3 * 4
+    val circleSize = round(beatmap.convertCStoRadius() / 640.0 * frameWidth * 2).toInt()
+    val titleGap = 17
+    val sliderGap = 17
     val slider: JSlider
 
     val buffer: BufferedImage
@@ -32,26 +36,38 @@ class BeatmapPreviewer(private val beatmap: Beatmap): JFrame("osu! previewer") {
     val drawPanel = JPanel()
 
     var lastRenderedHitObjects: List<HitObject>? = null
-
     var selectedHitObjectIndex = -1
 
+    val attributors = ArrayList<IAttribute>()
     val evaluators = ArrayList<CircleEvaluator>()
 
     init {
-        size = Dimension(512 + circleSize * 3, 372 + circleSize * 3 + titleGap)
+        drawPanel.preferredSize = Dimension(frameWidth + circleSize, frameHeight + circleSize + titleGap + sliderGap)
         slider = JSlider(0, beatmap.length, 0)
-        buffer = BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_ARGB)
+        buffer =
+            BufferedImage(drawPanel.preferredSize.width, drawPanel.preferredSize.height, BufferedImage.TYPE_INT_ARGB)
+
+        size = drawPanel.preferredSize
 
         layout = BorderLayout()
 
         add(drawPanel)
         add(slider, BorderLayout.SOUTH)
 
+        initEvaluators()
+        registerEvents()
+    }
+
+    fun initEvaluators() {
+        attributors.add(AttributeJump2())
+
         evaluators.add(CircleEvaluatorJump())
         evaluators.add(CircleEvaluatorDistance())
         evaluators.add(CircleEvaluatorTerm())
+        evaluators.add(CircleEvaluatorJump2())
+        evaluators.add(CircleEvaluatorDistance2())
 
-        registerEvents()
+        attributors.forEach { it.calculateAttribute(beatmap) }
     }
 
     fun registerEvents() {
@@ -68,16 +84,16 @@ class BeatmapPreviewer(private val beatmap: Beatmap): JFrame("osu! previewer") {
 
         addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent) {
-                val point = Point(e.x, e.y - titleGap)
+                val point = Point(adaptPosXReversed(e.x), adaptPosYReversed(e.y) - titleGap)
                 val ms = slider.value.toLong()
                 val msAR = beatmap.convertARtoMs()
 
-                for(index in beatmap.hitObjects.indices.reversed()) {
+                for (index in beatmap.hitObjects.indices.reversed()) {
                     val hitObject = beatmap.hitObjects[index]
 
                     if (abs(hitObject.startOffset - ms) <= msAR) {
 //                        println("${hitObject.startPosition} ${point}")
-                        if ((hitObject.startPosition - point).length <= circleSize) {
+                        if ((hitObject.startPosition - point).length <= circleSize / 4) {
                             selectedHitObjectIndex = index
                             break
                         }
@@ -100,15 +116,15 @@ class BeatmapPreviewer(private val beatmap: Beatmap): JFrame("osu! previewer") {
         val toRender = LinkedList<HitObject>()
 
         GlobalScope.launch(Dispatchers.IO) {
-            while(renderedCount < hitObjects.size) {
+            while (renderedCount < hitObjects.size) {
                 val elapsedMs = System.currentTimeMillis() - start
-                if(renderingCount < hitObjects.size && (hitObjects[renderingCount].startOffset - elapsedMs) <= 1950 - 150 * beatmap.AR) {
+                if (renderingCount < hitObjects.size && (hitObjects[renderingCount].startOffset - elapsedMs) <= (1950 - 150 * beatmap.AR) * 4) {
                     toRender.add(hitObjects[renderingCount])
 
                     renderingCount++
                 }
-                if(toRender.size > 0) {
-                    if(elapsedMs >= toRender.first().finishOffset) {
+                if (toRender.size > 0) {
+                    if (elapsedMs >= toRender.first().finishOffset) {
                         toRender.removeFirst()
                         renderedCount++
                     }
@@ -125,6 +141,12 @@ class BeatmapPreviewer(private val beatmap: Beatmap): JFrame("osu! previewer") {
         return beatmap.hitObjects.filter { abs(it.startOffset - elapsedMs) <= msAR }
     }
 
+    fun adaptPosX(x: Int) = (x / 640.0 * frameWidth).toInt() + (frameWidth - realWidth) / 4 + circleSize / 2
+    fun adaptPosY(y: Int) = (y / 360.0 * frameHeight).toInt() + circleSize / 2
+
+    fun adaptPosXReversed(x: Int) = ((x - (frameWidth - realWidth) / 4 - circleSize / 2) * 640.0 / frameWidth).toInt()
+    fun adaptPosYReversed(y: Int) = ((y - circleSize / 2) * 360.0 / frameHeight).toInt()
+
     fun renderFrame(toRender: List<HitObject>) {
         val graphics = buffer.graphics as Graphics2D
         graphics.color = Color.WHITE
@@ -132,51 +154,102 @@ class BeatmapPreviewer(private val beatmap: Beatmap): JFrame("osu! previewer") {
 
         graphics.color = Color.BLACK
         toRender.forEach { hitObject ->
+
             fun drawCircle(pos: Point, size: Int) {
                 //graphics.fillOval()
+                val previousColor = graphics.color
+
+                if (selectedHitObjectIndex >= 0
+                    && beatmap.hitObjects[selectedHitObjectIndex] == hitObject
+                )
+                    graphics.color = Color.GREEN
+
+                if (selectedHitObjectIndex >= 1
+                    && beatmap.hitObjects[selectedHitObjectIndex - 1] == hitObject
+                )
+                    graphics.color = Color.CYAN
+
+                if (selectedHitObjectIndex >= 0
+                    && selectedHitObjectIndex < beatmap.hitObjects.size - 1
+                    && beatmap.hitObjects[selectedHitObjectIndex + 1] == hitObject
+                )
+                    graphics.color = Color.BLUE
+
                 graphics.drawArc(
-                    (pos.xInt - (circleSize) / 2 + (circleSize - size) / 2),
-                    (pos.yInt - (circleSize) / 2 + (circleSize - size) / 2),
+                    (adaptPosX(pos.xInt) - (circleSize) / 2 + abs(circleSize - size) / 2).toInt(),
+                    (adaptPosY(pos.yInt) - (circleSize) / 2 + abs(circleSize - size) / 2).toInt(),
                     size,
                     size,
                     0,
-                    360)
+                    360
+                )
+
+                graphics.color = previousColor
             }
 
-            if(hitObject is Circle) {
+            fun drawColoredCircle(pos: Point, size: Int) {
+                val previousColor = graphics.color
+                graphics.color = Color.GREEN
+                drawCircle(pos, size)
+
+                graphics.color = previousColor
+            }
+
+            if (hitObject is Circle) {
                 drawCircle(hitObject.point, circleSize)
             }
-            if(hitObject is Slider) {
+            if (hitObject is Slider) {
                 drawCircle(hitObject.startPosition, circleSize)
                 drawCircle(hitObject.startPosition, circleSize / 2)
                 drawCircle(hitObject.endPosition, circleSize)
 
-                for(i in 0 until hitObject.path.size - 1) {
+                for (i in 0 until hitObject.path.size - 1) {
                     val currentPoint = hitObject.path[i]
                     val nextPoint = hitObject.path[i + 1]
 
                     graphics.drawLine(
-                        (currentPoint.xInt).toInt(),
-                        (currentPoint.yInt).toInt(),
-                        (nextPoint.xInt).toInt(),
-                        (nextPoint.yInt).toInt()
+                        adaptPosX(currentPoint.xInt).toInt(),
+                        adaptPosY(currentPoint.yInt).toInt(),
+                        adaptPosX(nextPoint.xInt).toInt(),
+                        adaptPosY(nextPoint.yInt).toInt()
                     )
                 }
             }
-            if(hitObject is Spinner) {
+            if (hitObject is Spinner) {
                 graphics.drawString("spinner is arriving", size.width / 2, size.height / 2)
             }
             //repaint()
         }
 
-        if(selectedHitObjectIndex >= 0) {
+        toRender.forEach {
+            //            if() {
+            fun drawRect(pos: Point) {
+                graphics.drawRect(adaptPosX(pos.x.toInt()) - 2, adaptPosY(pos.y.toInt()) - 2, 4, 4)
+            }
+
+            val pos = it.getAttributes()["jump2pos"]
+            val pos2 = it.getAttributes()["jump2pos2"]
+
+            if (pos != null && pos2 != null) {
+                drawRect(pos as Point)
+                drawRect(pos2 as Point)
+                graphics.drawLine(
+                    adaptPosX(pos.x.toInt()),
+                    adaptPosY(pos.y.toInt()),
+                    adaptPosX(pos2.x.toInt()),
+                    adaptPosY(pos2.y.toInt())
+                )
+            }
+//            }
+        }
+
+        if (selectedHitObjectIndex >= 0) {
 //            val builderLast = StringBuilder()
 //            val builderNext = StringBuilder()
 
             var lines = 0
             evaluators.forEach {
                 val result = it.evaluate(beatmap, selectedHitObjectIndex, 0)
-
                 graphics.drawString("${it.type}: ${result.lastResult}\n", 5, 20 + lines * 10)
                 graphics.drawString("${it.type}: ${result.nextResult}\n", 5, 120 + lines * 10)
                 lines++
@@ -188,8 +261,6 @@ class BeatmapPreviewer(private val beatmap: Beatmap): JFrame("osu! previewer") {
 
         drawPanel.graphics.drawImage(buffer, 0, 0, null)
     }
-
-
 
 
 }

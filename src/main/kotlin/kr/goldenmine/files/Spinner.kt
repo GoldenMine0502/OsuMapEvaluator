@@ -12,4 +12,11 @@ data class Spinner(
         get() = spinnerPos
     override val endPosition: Point
         get() = spinnerPos
+
+    val attributesPrivate = HashMap<String, Any>()
+
+    override fun getAttributes(): HashMap<String, Any> = attributesPrivate
+    override fun addAttribute(key: String, value: Any) {
+        attributesPrivate[key] = value
+    }
 }

@@ -8,6 +8,6 @@ class CircleEvaluatorDistance: CircleSeparatedEvaluator {
         get() = "distance"
 
     override fun evaluate(beatmap: Beatmap, lastHitObject: HitObject, currentHitObject: HitObject, mods: Int): Double {
-        return (currentHitObject.startPosition - lastHitObject.endPosition).length
+        return (currentHitObject.startPosition - lastHitObject.startPosition).length
     }
 }

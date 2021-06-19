@@ -28,6 +28,13 @@ data class Slider(
     override val finishOffset: Int
         get() = startOffset + (timingPoint.bpm * sliderLength()).toInt()
 
+    val attributesPrivate = HashMap<String, Any>()
+
+    override fun getAttributes(): HashMap<String, Any> = attributesPrivate
+    override fun addAttribute(key: String, value: Any) {
+        attributesPrivate[key] = value
+    }
+
     val path: List<Point>
 
     init {

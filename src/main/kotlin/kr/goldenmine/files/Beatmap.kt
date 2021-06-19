@@ -33,3 +33,7 @@ val Beatmap.length
 fun Beatmap.convertARtoMs(): Double {
     return 1950 - 150 * this.AR
 }
+
+fun Beatmap.convertCStoRadius(): Double {
+    return 54.4 - 4.48 * CS
+}

@@ -102,7 +102,7 @@ fun loadBeatmap(route: File): Beatmap {
                             if (inherited) {
                                 bpmMs = lastbpmMs ?: throw RuntimeException("inherited but lastbpm is null")
                                 bpm = lastbpm ?: throw RuntimeException("inherited but lastbpm is null")
-                                sliderVelocity = defaultVelocity * (-100.0 / split[1].toDouble())
+                                sliderVelocity = defaultVelocity * (-100.0 / split[1].toDouble()) // 귀납적
                             } else {
                                 bpmMs = split[1].toDouble()
                                 bpm = calculateBPM(split[1].toDouble())
