@@ -8,6 +8,6 @@ class CircleEvaluatorDensity: CircleSeparatedEvaluator {
         get() = "density"
 
     override fun evaluate(beatmap: Beatmap, lastHitObject: HitObject, currentHitObject: HitObject, mods: Int): Double {
-        return (currentHitObject.getAttributes()["density value"] as Int).toDouble()
+        return (currentHitObject.getAttributes()["density"] as Int).toDouble()
     }
 }

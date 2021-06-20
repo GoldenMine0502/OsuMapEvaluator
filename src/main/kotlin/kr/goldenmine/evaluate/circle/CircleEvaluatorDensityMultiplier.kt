@@ -5,7 +5,7 @@ import kr.goldenmine.files.HitObject
 
 class CircleEvaluatorDensityMultiplier: CircleSeparatedEvaluator {
     override val type: String
-        get() = "density"
+        get() = "density multiplier"
 
     override fun evaluate(beatmap: Beatmap, lastHitObject: HitObject, currentHitObject: HitObject, mods: Int): Double {
         return (currentHitObject.getAttributes()["density multiplier"] as Double)
