@@ -183,6 +183,11 @@ class BeatmapPreviewer(private val beatmap: Beatmap, private val mods: Int = 0) 
                 )
                     graphics.color = Color.BLUE
 
+//                if(selectedHitObjectIndex >= 0) {
+                    val multiplier = hitObject.getAttribute("density multiplier") as Double
+                    graphics.drawString(multiplier.toString(), adaptPosX(pos.xInt), adaptPosY(pos.yInt))
+//                }
+
                 graphics.drawArc(
                     (adaptPosX(pos.xInt) - (circleSize) / 2 + abs(circleSize - size) / 2).toInt(),
                     (adaptPosY(pos.yInt) - (circleSize) / 2 + abs(circleSize - size) / 2).toInt(),
