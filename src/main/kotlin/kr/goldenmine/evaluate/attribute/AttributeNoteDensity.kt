@@ -2,8 +2,6 @@ package kr.goldenmine.evaluate.attribute
 
 import kr.goldenmine.files.Beatmap
 import kr.goldenmine.files.convertARtoMs
-import kr.goldenmine.files.convertCStoRadius
-import kr.goldenmine.util.Point
 import java.lang.Math.pow
 import kotlin.math.*
 
@@ -24,8 +22,31 @@ class AttributeNoteDensity : IAttribute {
             // 연타는 7정도...
             // 이지점프는 8정도...
             // 이지연타는 15정도...
-            val multiplier = log10(9.0 + (min(10 + amountPlus, 10 + amountMinus) / 5.0).pow(2.5))
-            current.addAttribute("density", multiplier)
+//            val multiplier = log10(9.0 + (min(10 + amountPlus, 10 + amountMinus) / 5.0).pow(2.5))
+            current.addAttribute("density", min(amountPlus, amountMinus))
+        }
+
+        for(index in beatmap.hitObjects.indices) {
+            val current = beatmap.hitObjects[index]
+//            val density = current.getAttribute("density") as Double
+
+            val nearbyNotesPlus = beatmap.hitObjects.filter { it.startOffset >= current.startOffset && it.startOffset <= current.startOffset + ARms }
+            val nearbyNotesMinus = beatmap.hitObjects.filter { it.startOffset <= current.startOffset && it.startOffset >= current.startOffset - ARms }
+
+            val maxCountPlus = nearbyNotesPlus.maxBy { it.getAttribute("density") as Int }?.getAttribute("density") as Int?
+            val maxCountMinus = nearbyNotesMinus.maxBy { it.getAttribute("density") as Int }?.getAttribute("density") as Int?
+
+            val minCountPlus = nearbyNotesPlus.minBy { it.getAttribute("density") as Int }?.getAttribute("density") as Int?
+            val minCountMinus = nearbyNotesMinus.minBy { it.getAttribute("density") as Int }?.getAttribute("density") as Int?
+
+            if(maxCountPlus != null && maxCountMinus != null && minCountPlus != null && minCountMinus != null) {
+                val smallCountPlus = max(maxCountPlus - nearbyNotesPlus.filter { (it.getAttribute("density") as Int) < maxCountPlus }.size, minCountPlus)
+                val smallCountMinus = max(maxCountMinus - nearbyNotesMinus.filter { (it.getAttribute("density") as Int) < maxCountMinus }.size, minCountMinus)
+
+                val multiplier = log10(10.0 + (min(smallCountPlus, smallCountMinus) - 3.0).coerceAtLeast(0.1).pow(1.5) * 3)
+                current.addAttribute("density value", min(smallCountPlus, smallCountMinus))
+                current.addAttribute("density multiplier", multiplier)
+            }
         }
     }
 

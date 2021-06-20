@@ -72,6 +72,7 @@ class BeatmapPreviewer(private val beatmap: Beatmap, private val mods: Int = 0) 
         evaluators.add(CircleEvaluatorDistance2())
         evaluators.add(CircleEvaluatorVariance())
         evaluators.add(CircleEvaluatorDensity())
+        evaluators.add(CircleEvaluatorDensityMultiplier())
         evaluators.add(CircleEvaluatorJumpTest())
 
         attributors.forEach { it.calculateAttribute(beatmap, mods) }
