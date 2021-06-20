@@ -11,12 +11,12 @@ class AttributeNoteDensity : IAttribute {
         for (index in beatmap.hitObjects.indices) {
             val current = beatmap.hitObjects[index]
 
+            // TODO density amount대신 소숫점으로 (특정 bpm에서 density가 왔다갔다 하는 것 방지)
             // 현재 노트 기준으로 앞(이전) 뒤(이후) 노트 갯수 구하기
             val amountPlus = beatmap.hitObjects.filter { it.startOffset >= current.startOffset && it.startOffset <= current.startOffset + ARms }.size
             val amountMinus = beatmap.hitObjects.filter { it.startOffset <= current.startOffset && it.startOffset >= current.startOffset - ARms }.size
 
 //            println(amountPlus)
-            // TODO 오스에서 이후 나올 노트보다 이전에 나오는 노트가 빨리 화면상에서 사라지므로
 
             // 점프는 4정도...
             // 연타는 7정도...
@@ -43,7 +43,7 @@ class AttributeNoteDensity : IAttribute {
                     val smallCountPlus = //max(
                         density - nearbyNotes.filter { (it.getAttribute("density") as Int) < maxCountPlus }.size
 
-                    val multiplier = log10(10.0 + (smallCountPlus).toDouble().coerceAtLeast(0.1).pow(1.5) * 2)
+                    val multiplier = log10(10.0 + (smallCountPlus - 2).toDouble().coerceAtLeast(0.1).pow(1.6) * 1.5)
                     previous.addAttribute("density value", smallCountPlus)
                     previous.addAttribute("density multiplier", multiplier)
                 }

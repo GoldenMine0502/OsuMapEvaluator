@@ -3,10 +3,7 @@ package kr.goldenmine
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kr.goldenmine.evaluate.attribute.AttributeJump2
-import kr.goldenmine.evaluate.attribute.AttributeJumpVariance
-import kr.goldenmine.evaluate.attribute.AttributeNoteDensity
-import kr.goldenmine.evaluate.attribute.IAttribute
+import kr.goldenmine.evaluate.attribute.*
 import kr.goldenmine.evaluate.circle.*
 import kr.goldenmine.files.*
 import kr.goldenmine.util.Point
@@ -64,6 +61,7 @@ class BeatmapPreviewer(private val beatmap: Beatmap, private val mods: Int = 0) 
         attributors.add(AttributeJump2())
         attributors.add(AttributeJumpVariance())
         attributors.add(AttributeNoteDensity())
+        attributors.add(AttributeAdaptedTerm())
 
         evaluators.add(CircleEvaluatorJump())
         evaluators.add(CircleEvaluatorDistance())
@@ -74,6 +72,7 @@ class BeatmapPreviewer(private val beatmap: Beatmap, private val mods: Int = 0) 
         evaluators.add(CircleEvaluatorDensity())
         evaluators.add(CircleEvaluatorDensityMultiplier())
         evaluators.add(CircleEvaluatorJumpTest())
+        evaluators.add(CircleEvaluatorAdaptedTerm())
 
         attributors.forEach { it.calculateAttribute(beatmap, mods) }
     }
@@ -264,7 +263,7 @@ class BeatmapPreviewer(private val beatmap: Beatmap, private val mods: Int = 0) 
             evaluators.forEach {
                 val result = it.evaluate(beatmap, selectedHitObjectIndex, 0)
                 graphics.drawString("${it.type}: ${result.lastResult}\n", 5, 20 + lines * 10)
-                graphics.drawString("${it.type}: ${result.nextResult}\n", 5, 120 + lines * 10)
+                graphics.drawString("${it.type}: ${result.nextResult}\n", 5, 200 + lines * 10)
                 lines++
 //                builderLast.append("${it.type}: ${result.lastResult}\n")
 //                builderNext.append("${it.type}: ${result.nextResult}\n")
