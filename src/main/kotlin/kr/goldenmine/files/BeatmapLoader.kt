@@ -136,7 +136,9 @@ fun loadBeatmap(route: File): Beatmap {
                                         val (x, y) = it.split(":")
                                         Point(x.toInt(), y.toInt())
                                     }
+                                    val reverseCount = split[6].toInt()
                                     val length = split[7].toDouble()
+
                                     val dots = ArrayList<SliderDot>()
                                     dots.add(SliderDot(point, DotType.NONE))
 
@@ -160,6 +162,7 @@ fun loadBeatmap(route: File): Beatmap {
                                         offset,
                                         timingPoint,
                                         length,
+                                        reverseCount,
                                         // for 3 dots straight slider
                                         if(sliderType == Slider.Type.CURVE && dots.size != 3) Slider.Type.BEZIER else sliderType)
                                 }

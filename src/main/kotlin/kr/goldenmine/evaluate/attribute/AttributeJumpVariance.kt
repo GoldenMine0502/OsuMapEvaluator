@@ -7,6 +7,15 @@ import kotlin.math.*
 
 class AttributeJumpVariance: IAttribute {
     override fun calculateAttribute(beatmap: Beatmap, mods: Int) {
+        if(beatmap.hitObjects.size >= 1){
+            beatmap.hitObjects[0].addAttribute("jumpVariance", 1.0)
+        }
+        if(beatmap.hitObjects.size >= 2){
+            beatmap.hitObjects[1].addAttribute("jumpVariance", 1.0)
+        }
+        if(beatmap.hitObjects.size >= 1){
+            beatmap.hitObjects.last().addAttribute("jumpVariance", 1.0)
+        }
         for(index in beatmap.hitObjects.indices) {
             if(index > 0 && index < beatmap.hitObjects.size - 1) {
                 val previous = beatmap.hitObjects[index - 1]

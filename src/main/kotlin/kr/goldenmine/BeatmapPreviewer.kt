@@ -58,6 +58,7 @@ class BeatmapPreviewer(private val beatmap: Beatmap, private val mods: Int = 0) 
     }
 
     fun initEvaluators() {
+        attributors.add(AttributeEndPosition())
         attributors.add(AttributeJump2())
         attributors.add(AttributeJumpVariance())
         attributors.add(AttributeNoteDensity())
@@ -183,8 +184,8 @@ class BeatmapPreviewer(private val beatmap: Beatmap, private val mods: Int = 0) 
                     graphics.color = Color.BLUE
 
 //                if(selectedHitObjectIndex >= 0) {
-                    val multiplier = hitObject.getAttribute("density multiplier") as Double
-                    graphics.drawString(multiplier.toString(), adaptPosX(pos.xInt), adaptPosY(pos.yInt))
+//                    val multiplier = hitObject.getAttribute("density multiplier") as Double
+//                    graphics.drawString(multiplier.toString(), adaptPosX(pos.xInt), adaptPosY(pos.yInt))
 //                }
 
                 graphics.drawArc(
@@ -251,6 +252,13 @@ class BeatmapPreviewer(private val beatmap: Beatmap, private val mods: Int = 0) 
                     adaptPosX(pos2.x.toInt()),
                     adaptPosY(pos2.y.toInt())
                 )
+            }
+
+            if(it is Slider){
+                val endPosition = it.getAttribute("endPosition") as Point
+                graphics.drawString(endPosition.toString(), adaptPosX(endPosition.xInt), adaptPosY(endPosition.yInt))
+                graphics.drawString(it.finishOffset.toString(), adaptPosX(endPosition.xInt), adaptPosY(endPosition.yInt) + 10)
+                graphics.drawString(it.startOffset.toString(), adaptPosX(endPosition.xInt), adaptPosY(endPosition.yInt) + 20)
             }
 //            }
         }

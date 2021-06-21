@@ -13,6 +13,7 @@ data class Slider(
     override val startOffset: Int,
     val timingPoint: TimingPoint,
     val lengthPixel: Double,
+    val reverseCount: Int,
     val type: Type
 ) : HitObject {
 
@@ -26,7 +27,7 @@ data class Slider(
         get() = path.last()
 
     override val finishOffset: Int
-        get() = startOffset + (timingPoint.bpm * sliderLength()).toInt()
+        get() = startOffset + (lengthPixel * reverseCount).toInt()
 
     val attributesPrivate = HashMap<String, Any>()
 
@@ -40,6 +41,37 @@ data class Slider(
     }
 
     val path: List<Point>
+
+    fun sliderPosition(offset: Int): Point? {
+        val sliderTerm = finishOffset - startOffset
+
+        var currentOffset = startOffset.toDouble()
+        var pathTerm = sliderTerm.toDouble() / (path.size - 1)
+
+        for(reverseIndex in 0 until reverseCount) {
+            val isReversed = reverseIndex % 2 == 1
+
+            for (index in if(isReversed) path.indices.reversed() else path.indices) {
+
+                if (index < path.size - 1) {
+                    if (currentOffset <= offset && offset <= currentOffset + pathTerm + 1) {
+                        val current = path[index]
+                        val next = path[index + 1]
+                        println("$offset $currentOffset $pathTerm ")
+                        val point = middlePoint(current, next, (offset - currentOffset) / pathTerm)
+                        return point
+                    }
+                }
+                currentOffset += pathTerm
+            }
+        }
+        println("null $offset $finishOffset ")
+        return null
+    }
+
+    fun middlePoint(point: Point, point2: Point, percent: Double): Point {
+        return point + (point2 - point) * percent
+    }
 
     init {
         fun adaptResult(result: List<Point>): List<Point> {
