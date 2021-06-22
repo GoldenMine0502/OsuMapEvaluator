@@ -1,6 +1,8 @@
 package kr.goldenmine.evaluate.attribute
 
 import kr.goldenmine.files.Beatmap
+import kr.goldenmine.files.calculateODPre
+import kr.goldenmine.files.convertODto100
 import kr.goldenmine.files.convertODto300
 
 class AttributeEvaluatorAdaptedTerm: IAttributeEvaluator {

@@ -11,6 +11,7 @@ class CircleEvaluatorJumpTest: CircleSeparatedEvaluator {
 
     override fun evaluate(beatmap: Beatmap, lastHitObject: HitObject, currentHitObject: HitObject, mods: Int): Double {
         val a = (currentHitObject.getAttribute("jump2") as Double)
+        val aa = (currentHitObject.getAttribute("travelDistance") as Double)
         val b = currentHitObject.getAttribute("density multiplier") as Double
 //        val c = currentHitObject.getAttribute("jumpVariance") as Double
         val d = currentHitObject.getAttribute("adaptedTerm") as Double

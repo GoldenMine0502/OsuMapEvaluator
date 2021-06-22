@@ -46,7 +46,7 @@ class AttributeEvaluatorEndPosition: IAttributeEvaluator {
                 dotOffsets.sort()
 
 //                val finishPosition = current.getSliderPosition(current.finishOffset - sliderEndPositionOffset)
-                current.addAttribute("endOffset", sliderEndPositionOffset)
+                current.addAttribute("endOffset", current.finishOffset - sliderEndPositionOffset)
                 current.addAttribute("endPosition", dotOffsets.mapNotNull { current.getSliderPosition(it) })
 //                current.
                 // 슬라이더 크기는 cs d2.4배

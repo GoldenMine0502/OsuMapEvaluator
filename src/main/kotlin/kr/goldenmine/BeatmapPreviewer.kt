@@ -161,8 +161,23 @@ class BeatmapPreviewer(private val beatmap: Beatmap, private val mods: Int = 0) 
         graphics.fillRect(0, 0, buffer.width, buffer.height)
 
         graphics.color = Color.BLACK
-        toRender.forEach { hitObject ->
 
+        fun drawRect(pos: Point) {
+            graphics.drawRect(adaptPosX(pos.x.toInt()) - 2, adaptPosY(pos.y.toInt()) - 2, 4, 4)
+        }
+
+        fun drawLine(pos: Point, pos2: Point) {
+            graphics.drawLine(
+                adaptPosX(pos.x.toInt()),
+                adaptPosY(pos.y.toInt()),
+                adaptPosX(pos2.x.toInt()),
+                adaptPosY(pos2.y.toInt())
+            )
+        }
+
+
+
+        toRender.forEach { hitObject ->
             fun drawCircle(pos: Point, size: Int) {
                 //graphics.fillOval()
                 val previousColor = graphics.color
@@ -200,14 +215,6 @@ class BeatmapPreviewer(private val beatmap: Beatmap, private val mods: Int = 0) 
                 graphics.color = previousColor
             }
 
-            fun drawColoredCircle(pos: Point, size: Int) {
-                val previousColor = graphics.color
-                graphics.color = Color.GREEN
-                drawCircle(pos, size)
-
-                graphics.color = previousColor
-            }
-
             if (hitObject is Circle) {
                 drawCircle(hitObject.point, circleSize)
             }
@@ -220,12 +227,7 @@ class BeatmapPreviewer(private val beatmap: Beatmap, private val mods: Int = 0) 
                     val currentPoint = hitObject.path[i]
                     val nextPoint = hitObject.path[i + 1]
 
-                    graphics.drawLine(
-                        adaptPosX(currentPoint.xInt).toInt(),
-                        adaptPosY(currentPoint.yInt).toInt(),
-                        adaptPosX(nextPoint.xInt).toInt(),
-                        adaptPosY(nextPoint.yInt).toInt()
-                    )
+                    drawLine(currentPoint, nextPoint)
                 }
             }
             if (hitObject is Spinner) {
@@ -234,40 +236,23 @@ class BeatmapPreviewer(private val beatmap: Beatmap, private val mods: Int = 0) 
             //repaint()
         }
 
-        toRender.forEach {
-            //            if() {
-            fun drawRect(pos: Point) {
-                graphics.drawRect(adaptPosX(pos.x.toInt()) - 2, adaptPosY(pos.y.toInt()) - 2, 4, 4)
-            }
+        if(toRender.size > 0) {
+            (beatmap.getAttribute("positions") as List<Pair<Int, Point>>).filter {
+                val hitObject = beatmap.hitObjects[it.first]
+                toRender.first().startOffset <= hitObject.startOffset && hitObject.finishOffset <= toRender.last().finishOffset + 1
+            }.also {
+                val previousColor = graphics.color
+                graphics.color = Color.RED
 
-            val pos = it.getAttributes()["jump2pos"]
-            val pos2 = it.getAttributes()["jump2pos2"]
+                for (index in it.indices) {
+                    if (index < it.size - 1) {
+                        val pos = it[index].second
+                        val pos2 = it[index + 1].second
 
-            if (pos != null && pos2 != null) {
-                drawRect(pos as Point)
-                drawRect(pos2 as Point)
-                graphics.drawLine(
-                    adaptPosX(pos.x.toInt()),
-                    adaptPosY(pos.y.toInt()),
-                    adaptPosX(pos2.x.toInt()),
-                    adaptPosY(pos2.y.toInt())
-                )
-            }
-
-
-            if (it is Slider) {
-                (it.getAttribute("endPosition") as List<Point>?)?.run {
-                    if (size >= 2)
-                        println("$size ${it.startOffset} $this")
-                    this
-                }?.forEach { endPosition ->
-                    val x = adaptPosX(endPosition.xInt)
-                    val y = adaptPosY(endPosition.yInt)
-                    graphics.fillOval(x - 4, y - 4, 8, 8)
-//                    graphics.drawString(endPosition.toString(), adaptPosX(endPosition.xInt), adaptPosY(endPosition.yInt))
-//                        graphics.drawString(it.finishOffset.toString(), adaptPosX(endPosition.xInt), adaptPosY(endPosition.yInt) + 10)
-//                        graphics.drawString(it.startOffset.toString(), adaptPosX(endPosition.xInt), adaptPosY(endPosition.yInt) + 20)
+                        drawLine(pos, pos2)
+                    }
                 }
+                graphics.color = previousColor
             }
         }
 //                val endPosition = it.getAttribute("endPosition") as List<Point>
