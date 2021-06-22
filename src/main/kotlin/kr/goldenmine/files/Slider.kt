@@ -42,8 +42,9 @@ data class Slider(
 
     val path: List<Point>
 
-    fun sliderPosition(offset: Int): Point? {
-        val sliderTerm = finishOffset - startOffset
+    fun getSliderPosition(offset: Int): Point? {
+//        val sliderTerm = finishOffset - startOffset
+        val sliderTerm = lengthPixel
 
         var currentOffset = startOffset.toDouble()
         var pathTerm = sliderTerm.toDouble() / (path.size - 1)
@@ -54,15 +55,16 @@ data class Slider(
             for (index in if(isReversed) path.indices.reversed() else path.indices) {
 
                 if (index < path.size - 1) {
-                    if (currentOffset <= offset && offset <= currentOffset + pathTerm + 1) {
+//                    println("$currentOffset $offset $index $reverseIndex $pathTerm")
+                    if (currentOffset - 1 <= offset && offset <= currentOffset + pathTerm + 1) {
                         val current = path[index]
                         val next = path[index + 1]
-                        println("$offset $currentOffset $pathTerm ")
+//                        println("$offset $currentOffset $pathTerm ")
                         val point = middlePoint(current, next, (offset - currentOffset) / pathTerm)
                         return point
                     }
+                    currentOffset += pathTerm
                 }
-                currentOffset += pathTerm
             }
         }
         println("null $offset $finishOffset ")

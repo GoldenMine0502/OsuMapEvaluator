@@ -1,11 +1,9 @@
 package kr.goldenmine.evaluate.attribute
 
 import kr.goldenmine.files.Beatmap
-import kr.goldenmine.files.convertCStoRadius
-import kr.goldenmine.util.Point
 import kotlin.math.*
 
-class AttributeJumpVariance: IAttribute {
+class AttributeEvaluatorJumpVariance: IAttributeEvaluator {
     override fun calculateAttribute(beatmap: Beatmap, mods: Int) {
         if(beatmap.hitObjects.size >= 1){
             beatmap.hitObjects[0].addAttribute("jumpVariance", 1.0)

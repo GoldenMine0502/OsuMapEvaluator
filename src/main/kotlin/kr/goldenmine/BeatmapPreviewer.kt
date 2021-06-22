@@ -37,7 +37,7 @@ class BeatmapPreviewer(private val beatmap: Beatmap, private val mods: Int = 0) 
     var lastRenderedHitObjects: List<HitObject>? = null
     var selectedHitObjectIndex = -1
 
-    val attributors = ArrayList<IAttribute>()
+    val attributors = ArrayList<IAttributeEvaluator>()
     val evaluators = ArrayList<CircleEvaluator>()
 
     init {
@@ -58,11 +58,11 @@ class BeatmapPreviewer(private val beatmap: Beatmap, private val mods: Int = 0) 
     }
 
     fun initEvaluators() {
-        attributors.add(AttributeEndPosition())
-        attributors.add(AttributeJump2())
-        attributors.add(AttributeJumpVariance())
-        attributors.add(AttributeNoteDensity())
-        attributors.add(AttributeAdaptedTerm())
+        attributors.add(AttributeEvaluatorEndPosition())
+        attributors.add(AttributeEvaluatorJump2())
+        attributors.add(AttributeEvaluatorJumpVariance())
+        attributors.add(AttributeEvaluatorNoteDensity())
+        attributors.add(AttributeEvaluatorAdaptedTerm())
 
         evaluators.add(CircleEvaluatorJump())
         evaluators.add(CircleEvaluatorDistance())
@@ -254,15 +254,26 @@ class BeatmapPreviewer(private val beatmap: Beatmap, private val mods: Int = 0) 
                 )
             }
 
-            if(it is Slider){
-                val endPosition = it.getAttribute("endPosition") as Point
-                graphics.drawString(endPosition.toString(), adaptPosX(endPosition.xInt), adaptPosY(endPosition.yInt))
-                graphics.drawString(it.finishOffset.toString(), adaptPosX(endPosition.xInt), adaptPosY(endPosition.yInt) + 10)
-                graphics.drawString(it.startOffset.toString(), adaptPosX(endPosition.xInt), adaptPosY(endPosition.yInt) + 20)
-            }
-//            }
-        }
 
+            if (it is Slider) {
+                (it.getAttribute("endPosition") as List<Point>?)?.run {
+                    if (size >= 2)
+                        println("$size ${it.startOffset} $this")
+                    this
+                }?.forEach { endPosition ->
+                    val x = adaptPosX(endPosition.xInt)
+                    val y = adaptPosY(endPosition.yInt)
+                    graphics.fillOval(x - 4, y - 4, 8, 8)
+//                    graphics.drawString(endPosition.toString(), adaptPosX(endPosition.xInt), adaptPosY(endPosition.yInt))
+//                        graphics.drawString(it.finishOffset.toString(), adaptPosX(endPosition.xInt), adaptPosY(endPosition.yInt) + 10)
+//                        graphics.drawString(it.startOffset.toString(), adaptPosX(endPosition.xInt), adaptPosY(endPosition.yInt) + 20)
+                }
+            }
+        }
+//                val endPosition = it.getAttribute("endPosition") as List<Point>
+//                graphics.drawString(endPosition.toString(), adaptPosX(endPosition.xInt), adaptPosY(endPosition.yInt))
+//                graphics.drawString(it.finishOffset.toString(), adaptPosX(endPosition.xInt), adaptPosY(endPosition.yInt) + 10)
+//                graphics.drawString(it.startOffset.toString(), adaptPosX(endPosition.xInt), adaptPosY(endPosition.yInt) + 20)
         if (selectedHitObjectIndex >= 0) {
 //            val builderLast = StringBuilder()
 //            val builderNext = StringBuilder()

@@ -1,11 +1,9 @@
 package kr.goldenmine.evaluate.attribute
 
 import kr.goldenmine.files.Beatmap
-import kr.goldenmine.files.calculateODPre
-import kr.goldenmine.files.convertODto100
 import kr.goldenmine.files.convertODto300
 
-class AttributeAdaptedTerm: IAttribute {
+class AttributeEvaluatorAdaptedTerm: IAttributeEvaluator {
     override fun calculateAttribute(beatmap: Beatmap, mods: Int) {
         if(beatmap.hitObjects.size >= 1){
             beatmap.hitObjects.last().addAttribute("adaptedTerm", Integer.MAX_VALUE)

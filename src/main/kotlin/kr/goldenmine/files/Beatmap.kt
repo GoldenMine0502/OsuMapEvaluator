@@ -22,8 +22,22 @@ class Beatmap(
     //val sliderTickRate: Int,
     val timingPoints: List<TimingPoint>,
     val hitObjects: List<HitObject>
-) {
+): IAttribute {
 
+    val attributesPrivate = HashMap<String, Any>()
+
+    override fun getAttributes(): HashMap<String, Any> = attributesPrivate
+    override fun addAttribute(key: String, value: Any) {
+        attributesPrivate[key] = value
+    }
+
+    override fun getAttribute(key: String): Any? {
+        return attributesPrivate[key]
+    }
+
+    fun findTimingPoint(offset: Int): TimingPoint {
+        return timingPoints.firstOrNull() { it.offset >= offset } ?: timingPoints[0]
+    }
 }
 
 const val lastOffset = 10000

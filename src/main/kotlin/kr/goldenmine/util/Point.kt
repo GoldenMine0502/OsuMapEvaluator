@@ -1,5 +1,6 @@
 package kr.goldenmine.util
 
+import kotlin.math.round
 import kotlin.math.sqrt
 
 data class Point(val x: Double, val y: Double) {
@@ -8,8 +9,8 @@ data class Point(val x: Double, val y: Double) {
     val length: Double
         get() = sqrt(lengthSquared)
 
-    val xInt = x.toInt()
-    val yInt = y.toInt()
+    val xInt = round(x).toInt()
+    val yInt = round(y).toInt()
 
     constructor(x: Int, y: Int) : this(x.toDouble(), y.toDouble())
 

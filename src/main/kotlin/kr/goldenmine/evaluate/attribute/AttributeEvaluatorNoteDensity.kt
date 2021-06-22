@@ -5,7 +5,7 @@ import kr.goldenmine.files.convertARtoMs
 import java.lang.Math.pow
 import kotlin.math.*
 
-class AttributeNoteDensity : IAttribute {
+class AttributeEvaluatorNoteDensity : IAttributeEvaluator {
     override fun calculateAttribute(beatmap: Beatmap, mods: Int) {
         val ARms = beatmap.convertARtoMs(mods)
         for (index in beatmap.hitObjects.indices) {
