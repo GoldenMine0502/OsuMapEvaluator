@@ -15,7 +15,9 @@ class CircleEvaluatorJumpTest: CircleSeparatedEvaluator {
         val b = currentHitObject.getAttribute("density multiplier") as Double
 //        val c = currentHitObject.getAttribute("jumpVariance") as Double
         val d = currentHitObject.getAttribute("adaptedTerm") as Double
-        return a * b / d
+
+        val tapTime = 15
+        return a * b / (d - tapTime)
 
     }
 }
